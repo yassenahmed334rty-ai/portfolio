@@ -1,0 +1,42 @@
+NEXUS PREMIUM STORE — UPGRADE NOTES
+===================================
+
+Visual design
+- Reworked the storefront into a more consistent premium electronics experience.
+- Updated the hero section with layered orange lighting, product showcase card,
+  floating trust indicators, animated orbit lines and store highlights.
+- Refined header, search, navigation, buttons, category tiles, product cards,
+  rating treatment, filters, cart drawer, product detail, checkout panels and footer.
+- Added responsive layouts for desktop, tablet and mobile.
+- Added scroll reveal, hover lift, product float, slide entrance, shimmer and
+  back-to-top interactions.
+- Respects prefers-reduced-motion for visitors who request reduced animation.
+- Added a local product-image fallback so broken remote image URLs don't leave
+  blank image areas.
+- Polished the admin login and dashboard styles to align with the orange/black brand.
+
+Functional fixes
+- Exposed the wishlist toggle helper to the product detail page so wishlist state
+  and the header counter stay in sync.
+- Cart quantity controls respect available stock when stock data is available.
+- Checkout quote and promo requests now handle network errors and display feedback.
+- Checkout validates required fields before sending the order request.
+- Added accessible labels and a working back-to-top control.
+
+Verification
+- JavaScript syntax checked with Node.js.
+- Python source compiled successfully.
+- All Jinja templates parsed successfully.
+- CSS brace balance checked.
+- Full Flask integration tests could not run in this build environment because Flask
+  packages were unavailable and package download access was blocked. Run the included
+  tests locally after installing requirements-dev.txt if you want to run pytest.
+
+Before sale / production
+- Replace sample store contact details and product descriptions with verified data.
+- Set a unique long SECRET_KEY and new admin credentials in .env.
+- Use HTTPS and set COOKIE_SECURE=1 only after HTTPS is configured.
+- Configure production hosting and a production WSGI server; `py app.py` is for local
+  development, not public production deployment.
+- Test order placement, stock updates, image upload, cancellation, and admin workflows
+  in a staging environment before accepting real orders.
