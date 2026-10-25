@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ cfg.STORE_NAME }} — {{ cfg.STORE_TAGLINE }}{% endblock %}</title>
+    <meta name="description" content="{% block desc %}{{ cfg.STORE_TAGLINE }}. Shop top laptop brands with fast delivery and reliable support.{% endblock %}">
+    <meta property="og:site_name" content="{{ cfg.STORE_NAME }}">
+    <meta property="og:title" content="{{ self.title() }}">
+    <meta property="og:description" content="{{ self.desc() }}">
+    {% block og %}{% endblock %}
+    <meta name="theme-color" content="#ff6b00">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ff6b00'/%3E%3Ctext x='16' y='23' font-size='20' font-family='Arial' font-weight='700' text-anchor='middle' fill='white'%3EN%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/store.css') }}?v=7">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/premium-motion.css') }}?v=1">
+    {% block head %}{% endblock %}
+</head>
+<body>
+{% if cfg.ANNOUNCEMENT %}<div class="announce">{{ cfg.ANNOUNCEMENT }}</div>{% endif %}
+<header class="site-header">
+    <div class="container header-inner">
+        <a href="/" class="logo" aria-label="{{ cfg.STORE_NAME }} home"><span class="logo-mark"><i class="fas fa-laptop"></i></span>{{ cfg.STORE_NAME }}</a>
+        <form class="search" id="searchForm" action="/" method="get" role="search">
+            <select name="cat" id="catSelect" aria-label="Category"><option value="">All categories</option></select>
+            <input type="search" name="q" id="searchInput" placeholder="Search laptops, brands, specs…" aria-label="Search products" autocomplete="off">
+            <button type="submit" aria-label="Search"><i class="fas fa-search"></i></button>
+        </form>
+        <div class="header-actions">
+            <a class="icon-btn" href="/track"><i class="fas fa-box"></i><span>Track order</span></a>
+            <a class="icon-btn" href="/?wishlist=1"><i class="far fa-heart"></i><span>Wishlist</span><b class="badge" id="wishBadge" data-n="0"></b></a>
+            <button class="icon-btn" id="openCart" type="button" aria-label="Open cart"><i class="fas fa-shopping-bag"></i><span>Cart</span><b class="badge" id="cartBadge" data-n="0"></b></button>
+        </div>
+    </div>
+</header>
+<nav class="main-nav" aria-label="Primary"><div class="container"><ul id="mainNav">
+    <li><a href="/" data-nav="home">Home</a></li>
+    <li><a href="/?sort=new" data-nav="new">New arrivals</a></li>
+    <li><a href="/?sort=best" data-nav="best">Best sellers</a></li>
+    <li><a href="/track">Track order</a></li>
+    <li><a href="/policies/shipping-returns">Shipping &amp; returns</a></li>
+</ul></div></nav>
+
+{% block content %}{% endblock %}
+
+<footer class="site-footer">
+    <div class="container">
+        <div class="foot-grid">
+            <div>
+                <a class="logo" href="/"><span class="logo-mark"><i class="fas fa-laptop"></i></span>{{ cfg.STORE_NAME }}</a>
+                <p style="font-size:14px;max-width:300px">{{ cfg.STORE_TAGLINE }}.</p>
+            </div>
+            <div><h5>Shop</h5><a href="/">All products</a><a href="/?sort=new">New arrivals</a><a href="/?sort=best">Best sellers</a></div>
+            <div><h5>Help</h5><a href="/track">Track your order</a><a href="/policies/shipping-returns">Shipping &amp; returns</a><a href="/policies/terms">Terms of service</a><a href="/policies/privacy">Privacy policy</a></div>
+            <div><h5>Contact</h5>
+                {% if cfg.SUPPORT_PHONE %}<a href="tel:{{ cfg.SUPPORT_PHONE }}"><i class="fas fa-phone"></i> {{ cfg.SUPPORT_PHONE }}</a>{% endif %}
+                {% if cfg.SUPPORT_EMAIL %}<a href="mailto:{{ cfg.SUPPORT_EMAIL }}"><i class="fas fa-envelope"></i> {{ cfg.SUPPORT_EMAIL }}</a>{% endif %}
+                {% if not cfg.SUPPORT_PHONE and not cfg.SUPPORT_EMAIL %}<a href="/track">Order support</a>{% endif %}
+            </div>
+        </div>
+        <div class="copy"><span>&copy; {{ year }} {{ cfg.STORE_NAME }}. All rights reserved.</span><span>Secure ordering · Genuine products</span></div>
+    </div>
+</footer>
+{% if cfg.WHATSAPP_NUMBER %}<a class="wa" href="https://wa.me/{{ cfg.WHATSAPP_NUMBER }}" target="_blank" rel="noopener" aria-label="Chat on WhatsApp"><i class="fab fa-whatsapp"></i></a>{% endif %}
+
+<div class="shade" id="shade"></div>
+<aside class="drawer" id="drawer" aria-label="Shopping cart" aria-hidden="true">
+    <header><h2>Your cart</h2><button class="x" id="closeCart" type="button" aria-label="Close cart">&times;</button></header>
+    <div class="body" id="cartBody"></div>
+    <footer id="cartFoot"></footer>
+</aside>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<button class="back-to-top" id="backToTop" type="button" aria-label="Back to top" title="Back to top"><i class="fas fa-arrow-up"></i></button>
+
+<script id="nexus-config" type="application/json">{{ {'currency': cfg.CURRENCY, 'freeShip': cfg.FREE_SHIPPING_THRESHOLD, 'shipFee': cfg.SHIPPING_FEE} | tojson }}</script>
+<script src="{{ url_for('static', filename='js/store.js') }}?v=7"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

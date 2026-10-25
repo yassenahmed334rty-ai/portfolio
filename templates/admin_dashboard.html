@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex"><meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Admin | {{ cfg.STORE_NAME }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}?v=5">
+    <style>
+        .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:24px}
+        .stat{background:#fff;border:1px solid #e6e8ec;border-radius:12px;padding:16px}.stat b{display:block;font-size:26px}.stat span{color:#6b7280;font-size:13px}
+        .tab{display:none}.tab.on{display:block}
+        .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;background:#eef;color:#334}
+        .pill.pending{background:#fff4e0;color:#b45309}.pill.confirmed{background:#e0f2fe;color:#075985}.pill.shipped{background:#ede9fe;color:#5b21b6}.pill.delivered{background:#dcfce7;color:#166534}.pill.cancelled{background:#fee2e2;color:#991b1b}
+        .low{color:#dc2626;font-weight:700}
+        .st-select{padding:6px 8px;border-radius:8px;border:1px solid #d1d5db}
+        .items-cell{font-size:12.5px;color:#555;max-width:260px}
+        .toolbar-a{display:flex;gap:10px;align-items:center}
+    </style>
+</head>
+<body class="admin-body dashboard-body">
+<header class="admin-header">
+    <div class="header-left"><h1 class="logo-text"><span class="nexus-text-accent">{{ cfg.STORE_NAME|upper }}</span> ADMIN</h1></div>
+    <div class="header-right"><form method="post" action="{{ url_for('admin_logout') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="logout-btn" type="submit"><i class="fas fa-sign-out-alt"></i> Logout</button></form></div>
+</header>
+<div class="admin-container">
+    <aside class="admin-sidebar"><ul class="admin-nav" id="tabNav">
+        <li class="active"><a href="#overview" data-tab="overview"><i class="fas fa-chart-line"></i> Overview</a></li>
+        <li><a href="#orders" data-tab="orders"><i class="fas fa-receipt"></i> Orders</a></li>
+        <li><a href="#products" data-tab="products"><i class="fas fa-box"></i> Products</a></li>
+        <li><a href="#subscribers" data-tab="subscribers"><i class="fas fa-envelope"></i> Subscribers</a></li>
+        <li><a href="/" target="_blank" rel="noopener"><i class="fas fa-external-link-alt"></i> View store</a></li>
+    </ul></aside>
+    <main class="admin-main">
+        <section class="tab on" id="tab-overview"><div class="page-header"><h2>Overview</h2></div>
+            <div class="stats" id="stats"></div>
+            <h3 style="margin-bottom:10px">Latest orders</h3>
+            <div class="table-container"><table class="admin-table"><thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead><tbody id="recentBody"></tbody></table></div>
+        </section>
+        <section class="tab" id="tab-orders"><div class="page-header"><h2>Orders</h2>
+            <div class="toolbar-a"><select id="orderFilter" class="st-select"><option value="">All statuses</option>{% for s in statuses %}<option value="{{ s }}">{{ s|capitalize }}</option>{% endfor %}</select>
+            <a class="btn-create" href="/admin/export/orders.csv"><i class="fas fa-download"></i> Export CSV</a></div></div>
+            <div class="table-container"><table class="admin-table"><thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Date</th><th>Status</th></tr></thead><tbody id="orderBody"></tbody></table></div>
+        </section>
+        <section class="tab" id="tab-products">
+            <div class="page-header"><h2>Products</h2><button class="btn-create" onclick="openProductModal()"><i class="fas fa-plus"></i> Add product</button></div>
+            <div class="table-container"><table class="admin-table"><thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead><tbody id="productTableBody"></tbody></table></div>
+        </section>
+        <section class="tab" id="tab-subscribers"><div class="page-header"><h2>Newsletter subscribers</h2></div>
+            <div class="table-container"><table class="admin-table"><thead><tr><th>Email</th><th>Joined</th></tr></thead><tbody id="subBody"></tbody></table></div>
+        </section>
+    </main>
+</div>
+
+<div class="admin-modal" id="productModal">
+    <div class="modal-backdrop-admin" onclick="closeProductModal()"></div>
+    <div class="modal-content-admin">
+        <div class="modal-header-admin"><h3 id="modalTitle">Add product</h3><button class="close-modal-btn" onclick="closeProductModal()" aria-label="Close"><i class="fas fa-times"></i></button></div>
+        <div class="modal-body-admin"><form id="productForm" onsubmit="handleProductSubmit(event)">
+            <input type="hidden" id="productId"><input type="hidden" id="currentImageUrl">
+            <div class="form-grid">
+                <div class="form-group span-2"><label for="productName">Product name *</label><input id="productName" name="name" required maxlength="160"></div>
+                <div class="form-group"><label for="productPrice">Price *</label><input type="number" id="productPrice" name="price" required step="0.01" min="0.01"></div>
+                <div class="form-group"><label for="productStock">Stock quantity *</label><input type="number" id="productStock" name="stock" required min="0" value="10"></div>
+                <div class="form-group"><label for="productCategory">Category *</label><input id="productCategory" name="category" required placeholder="e.g. Gaming Laptops"></div>
+                <div class="form-group"><label for="productBrand">Brand</label><input id="productBrand" name="brand" placeholder="e.g. Dell"></div>
+                <div class="form-group"><label for="productRating">Rating (0–5)</label><input type="number" id="productRating" name="rating" step="0.1" min="0" max="5"></div>
+                <div class="form-group"><label for="productImage">Image (PNG/JPG/WEBP, max 6 MB)</label><input type="file" id="productImage" name="image" accept="image/png,image/jpeg,image/webp,image/gif" class="file-input"><small class="form-hint">Leave empty to keep the current image.</small></div>
+                <div class="form-group span-2"><label for="productShortSpecs">Short specs</label><input id="productShortSpecs" name="short_specs" maxlength="200" placeholder="M3 • 16GB • 512GB SSD"></div>
+                <div class="form-group span-2"><label for="productDescription">Description</label><textarea id="productDescription" name="description" rows="3" maxlength="3000"></textarea></div>
+                <div class="form-group span-2"><label for="productFullSpecs">Full specifications (JSON)</label><textarea id="productFullSpecs" name="full_specs" rows="3" placeholder='{"Screen": "14-inch", "Battery": "18 h"}'></textarea></div>
+                <div class="form-group toggle-group"><label class="toggle-checkbox"><input type="checkbox" id="productIsNew"><span class="toggle-switch"></span><span>New label</span></label></div>
+                <div class="form-group toggle-group"><label class="toggle-checkbox"><input type="checkbox" id="productIsBestseller"><span class="toggle-switch"></span><span>Bestseller</span></label></div>
+            </div>
+            <div class="modal-footer-admin"><button type="button" class="btn-secondary" onclick="closeProductModal()">Cancel</button><button type="submit" class="btn-primary" id="saveProductBtn">Save product</button></div>
+        </form></div>
+    </div>
+</div>
+<script id="nexus-config" type="application/json">{{ {'currency': cfg.CURRENCY} | tojson }}</script>
+<script src="{{ url_for('static', filename='js/admin.js') }}?v=6"></script>
+</body>
+</html>

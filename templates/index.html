@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="container">
+    <section class="hero" aria-roledescription="carousel" aria-label="Featured">
+        <div class="hero-text" aria-live="polite">
+            <small id="heroKicker">New season</small>
+            <h1 id="heroTitle">Performance that keeps up with you</h1>
+            <p id="heroCopy">Hand-picked laptops from the world's best brands.</p>
+            <a href="#shop" class="btn" id="heroCta">Shop the collection <i class="fas fa-arrow-right"></i></a>
+            <div class="hero-stats" aria-label="Store highlights">
+                <div><strong>01</strong><span>Curated tech</span></div>
+                <div><strong>02</strong><span>Secure checkout</span></div>
+                <div><strong>03</strong><span>Human support</span></div>
+            </div>
+        </div>
+        <div class="hero-visual" aria-label="Featured product">
+            <div class="hero-orbit hero-orbit-one"></div>
+            <div class="hero-orbit hero-orbit-two"></div>
+            <a class="hero-product" id="heroProductLink" href="#shop" aria-label="Explore featured product">
+                <span class="hero-product-kicker"><i class="fas fa-sparkles"></i> EDITOR'S PICK</span>
+                <img id="heroProductImage" src="" alt="Featured premium laptop" loading="eager">
+                <span class="hero-product-caption">
+                    <span><small>FEATURED DEVICE</small><b id="heroProductName">Premium performance</b></span>
+                    <span class="hero-product-price" id="heroProductPrice"></span>
+                </span>
+            </a>
+            <div class="hero-float hero-float-top"><i class="fas fa-shield-check"></i><span><b>Trusted tech</b><small>Quality you can count on</small></span></div>
+            <div class="hero-float hero-float-bottom"><i class="fas fa-truck-fast"></i><span><b>Ready to ship</b><small>Fast, reliable delivery</small></span></div>
+        </div>
+        <div class="hero-dots" id="heroDots"></div>
+    </section>
+
+    <section class="trust" aria-label="Why shop with us">
+        <div><i class="fas fa-truck-fast"></i><p><b>Fast delivery</b><span>Free over {{ cfg.CURRENCY }}{{ '{:,.0f}'.format(cfg.FREE_SHIPPING_THRESHOLD) }}</span></p></div>
+        <div><i class="fas fa-shield-halved"></i><p><b>Genuine products</b><span>Brand-new &amp; sealed</span></p></div>
+        <div><i class="fas fa-rotate-left"></i><p><b>Easy returns</b><span>See return policy</span></p></div>
+        <div><i class="fas fa-headset"></i><p><b>Real support</b><span>Talk to a human</span></p></div>
+    </section>
+
+    <section class="cats" id="catCards" aria-label="Shop by category"></section>
+
+    <div class="shop" id="shop">
+        <aside class="sidebar" aria-label="Filters">
+            <section><h4>Max price: <span id="priceLabel"></span></h4><input type="range" id="priceRange" min="0" max="5000" step="50" value="5000" aria-label="Maximum price"></section>
+            <section><h4>Brand</h4><div class="chips" id="brandChips"></div></section>
+            <section><label class="chip" style="display:inline-flex;gap:8px;cursor:pointer"><input type="checkbox" id="inStockOnly"> In stock only</label></section>
+            <section><h4>Newsletter</h4>
+                <p style="font-size:13px;color:var(--muted);margin-bottom:10px">New arrivals and offers, no spam.</p>
+                <form class="news" id="newsForm"><input type="email" id="newsEmail" placeholder="Email address" required aria-label="Email address"><button class="btn" style="padding:9px 14px" type="submit">Join</button></form>
+            </section>
+        </aside>
+        <section aria-live="polite">
+            <div class="toolbar">
+                <div><h2 id="listTitle">All laptops</h2><span class="count" id="resultCount"></span></div>
+                <label><span class="sr-only">Sort</span>
+                <select id="sortSelect"><option value="featured">Featured</option><option value="new">Newest</option><option value="best">Best sellers</option><option value="price-asc">Price: low to high</option><option value="price-desc">Price: high to low</option><option value="rating">Top rated</option></select></label>
+            </div>
+            <div class="grid" id="productsGrid"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+        </section>
+    </div>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/home.js') }}?v=7"></script>{% endblock %}

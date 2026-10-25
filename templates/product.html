@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} — {{ cfg.STORE_NAME }}{% endblock %}
+{% block desc %}{{ product.name }}{% if product.short_specs %} — {{ product.short_specs }}{% endif %}. Order online from {{ cfg.STORE_NAME }}.{% endblock %}
+{% block og %}<meta property="og:type" content="product"><meta property="og:image" content="{{ product.image_url if product.image_url.startswith('http') else request.url_root.rstrip('/') ~ product.image_url }}">
+<script type="application/ld+json">{{ {"@context":"https://schema.org","@type":"Product","name":product.name,"image":product.image_url,"brand":{"@type":"Brand","name":product.brand},"description":product.short_specs,"offers":{"@type":"Offer","price":product.price,"priceCurrency":cfg.CURRENCY_CODE,"availability":"https://schema.org/InStock" if product.in_stock else "https://schema.org/OutOfStock","url":request.base_url}} | tojson }}</script>{% endblock %}
+{% block content %}
+<main class="container">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/?cat={{ product.category | urlencode }}">{{ product.category }}</a> / {{ product.name }}</nav>
+    <div class="pdp">
+        <div class="pdp-img"><img src="{{ product.image_url }}" alt="{{ product.name }}" onerror="this.onerror=null;this.src='/static/uploads/images.jpg'"></div>
+        <div>
+            <div class="brand" style="color:var(--primary);font-weight:800;text-transform:uppercase;font-size:13px;letter-spacing:.06em">{{ product.brand }}</div>
+            <h1>{{ product.name }}</h1>
+            {% if product.rating %}<div class="stars" aria-label="Rated {{ product.rating }} out of 5">
+                {% for i in range(1,6) %}<i class="{{ 'fas' if product.rating >= i else ('fas fa-star-half-alt' if product.rating >= i-0.5 else 'far') }} fa-star"></i>{% endfor %}
+                <span style="color:var(--muted);margin-left:6px">{{ '%.1f'|format(product.rating) }} / 5</span></div>{% endif %}
+            <div style="margin-top:14px" class="price">{{ cfg.CURRENCY }}{{ '{:,.2f}'.format(product.price) }}</div>
+            {% if product.stock <= 0 %}<div class="stock out"><i class="fas fa-circle-xmark"></i> Out of stock</div>
+            {% elif product.stock <= 3 %}<div class="stock low"><i class="fas fa-bolt"></i> Only {{ product.stock }} left</div>
+            {% else %}<div class="stock in"><i class="fas fa-circle-check"></i> In stock</div>{% endif %}
+            {% if product.short_specs %}<div class="keyspecs"><b>Key specs:</b> {{ product.short_specs }}</div>{% endif %}
+            {% if product.description %}<p style="color:var(--ink-2);margin-bottom:6px">{{ product.description }}</p>{% endif %}
+            <div class="buy">
+                <div class="qty"><button type="button" id="qMinus" aria-label="Decrease quantity">−</button><span id="qVal">1</span><button type="button" id="qPlus" aria-label="Increase quantity">+</button></div>
+                <button class="btn" id="addBtn" type="button" style="flex:1" {{ 'disabled' if product.stock <= 0 }}><i class="fas fa-shopping-bag"></i> {{ 'Sold out' if product.stock <= 0 else 'Add to cart' }}</button>
+                <button class="btn btn-ghost" id="wishBtn" type="button" aria-label="Save to wishlist"><i class="far fa-heart"></i></button>
+            </div>
+            <div class="assure">
+                <div><i class="fas fa-truck-fast"></i> Free shipping over {{ cfg.CURRENCY }}{{ '{:,.0f}'.format(cfg.FREE_SHIPPING_THRESHOLD) }}</div>
+                <div><i class="fas fa-shield-halved"></i> Genuine, brand-new product</div>
+                <div><i class="fas fa-rotate-left"></i> <a href="/policies/shipping-returns" style="text-decoration:underline">Returns &amp; warranty policy</a></div>
+            </div>
+        </div>
+    </div>
+    {% if product.full_specs %}
+    <section class="specs"><h2>Full specifications</h2><dl>
+        {% for k, v in product.full_specs.items() %}<div class="spec-row"><dt>{{ k }}</dt><dd>{{ v }}</dd></div>{% endfor %}
+    </dl></section>{% endif %}
+    <section class="related"><h2>You may also like</h2><div class="grid" id="relatedGrid"></div></section>
+</main>
+{% endblock %}
+{% block scripts %}
+<script>
+(() => {
+  const {$, cardHTML, bindCards, addToCart, toast} = Store;
+  const P = {{ {'id': product.id, 'name': product.name, 'price': product.price, 'image_url': product.image_url, 'stock': product.stock} | tojson }};
+  let qty = 1; const max = Math.min(10, P.stock);
+  $('#qMinus').onclick = () => { qty = Math.max(1, qty - 1); $('#qVal').textContent = qty; };
+  $('#qPlus').onclick = () => { if (qty >= max) return toast(`Maximum available: ${max}`); qty++; $('#qVal').textContent = qty; };
+  $('#addBtn').onclick = () => { addToCart(P, qty); Store.openCart(); };
+  const wb = $('#wishBtn'), icon = wb.querySelector('i');
+  const paint = () => icon.className = (Store.wished(P.id) ? 'fas' : 'far') + ' fa-heart';
+  paint(); wb.onclick = () => { const w = Store.read('nexus.wish.v2', []); const on = !w.includes(P.id);
+    Store.toggleWish(P.id); paint(); toast(on ? 'Saved to wishlist' : 'Removed from wishlist'); };
+  fetch('/api/products/related/' + P.id).then(r => r.json()).then(list => {
+    const g = $('#relatedGrid'); if (!list.length) return g.closest('section').remove();
+    g.innerHTML = list.map(cardHTML).join(''); bindCards(g, list);
+  }).catch(() => $('#relatedGrid').closest('section').remove());
+})();
+</script>
+{% endblock %}

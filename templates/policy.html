@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — {{ cfg.STORE_NAME }}{% endblock %}
+{% block content %}
+<main class="container page"><div class="prose"><h1>{{ title }}</h1>
+{% if slug == 'shipping-returns' %}
+<h2>Shipping</h2><p>Orders are processed within 1–2 business days. Shipping is free on orders of {{ cfg.CURRENCY }}{{ '{:,.0f}'.format(cfg.FREE_SHIPPING_THRESHOLD) }} or more; otherwise a flat fee of {{ cfg.CURRENCY }}{{ '{:,.0f}'.format(cfg.SHIPPING_FEE) }} applies. You can follow your order any time from the <a href="/track" style="text-decoration:underline">tracking page</a>.</p>
+<h2>Returns</h2><p>If your product arrives damaged or not as described, contact us within 14 days of delivery and we will arrange a replacement or refund. Items must be unused and in their original packaging.</p>
+<h2>Warranty</h2><p>All products carry the manufacturer's warranty. Keep your order confirmation as proof of purchase.</p>
+{% elif slug == 'privacy' %}
+<h2>What we collect</h2><p>When you place an order we collect your name, phone number, delivery address and optionally your email, solely to deliver and support your order. If you join the newsletter we store your email address.</p>
+<h2>How we use it</h2><p>We never sell your personal data. It is shared only with delivery partners as needed to fulfil your order. You can ask us to delete your data at any time{% if cfg.SUPPORT_EMAIL %} by emailing {{ cfg.SUPPORT_EMAIL }}{% endif %}.</p>
+<h2>Cookies &amp; storage</h2><p>We store your cart and wishlist in your browser so they persist between visits. No advertising trackers are used.</p>
+{% else %}
+<h2>Orders</h2><p>Placing an order is an offer to buy. We may decline or cancel an order for reasons such as stock errors or suspected fraud, in which case any payment is refunded.</p>
+<h2>Pricing</h2><p>Prices are shown in {{ cfg.CURRENCY }} and are confirmed at checkout. We reserve the right to correct pricing errors.</p>
+<h2>Liability</h2><p>To the extent permitted by law, our liability is limited to the value of the order. Nothing here limits your statutory consumer rights.</p>
+{% endif %}
+<p style="font-size:13px;color:var(--muted);margin-top:30px">Last updated {{ year }}. These are standard templates — have them reviewed for your jurisdiction before launch.</p></div></main>
+{% endblock %}

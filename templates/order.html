@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Order {{ order.order_number }} — {{ cfg.STORE_NAME }}{% endblock %}
+{% block head %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+{% set flow = ['pending','confirmed','shipped','delivered'] %}
+<main class="container page"><div style="max-width:780px;margin:auto">
+    <div class="ok-hero">
+        {% if order.status == 'cancelled' %}<div class="tick" style="background:#fee2e2;color:var(--bad)"><i class="fas fa-xmark"></i></div><h1>Order cancelled</h1>
+        {% else %}<div class="tick"><i class="fas fa-check"></i></div><h1>Thank you, {{ order.customer_name.split(' ')[0] }}!</h1>{% endif %}
+        <p style="color:var(--muted)">Order <b style="color:var(--ink)">{{ order.order_number }}</b> · placed {{ order.created_at[:10] }}</p>
+    </div>
+    {% if order.status != 'cancelled' %}<ol class="steps" style="padding:0">
+        {% for s in flow %}<li class="{{ 'done' if flow.index(order.status) >= loop.index0 }}"><i>{{ loop.index }}</i>{{ s|capitalize }}</li>{% endfor %}
+    </ol>{% endif %}
+    <div class="panel" style="margin-bottom:18px"><h2>Items</h2>
+        {% for it in items %}<div class="line" style="grid-template-columns:64px 1fr auto"><img src="{{ it.image_url }}" alt=""><div><b>{{ it.name }}</b><div class="meta">{{ cfg.CURRENCY }}{{ '{:,.2f}'.format(it.unit_price) }} × {{ it.quantity }}</div></div><b>{{ cfg.CURRENCY }}{{ '{:,.2f}'.format(it.unit_price * it.quantity) }}</b></div>{% endfor %}
+        <div style="margin-top:16px">
+            <div class="sum-row"><span>Subtotal</span><span>{{ cfg.CURRENCY }}{{ '{:,.2f}'.format(order.subtotal) }}</span></div>
+            {% if order.discount %}<div class="sum-row"><span>Discount ({{ order.promo_code }})</span><span class="ok">−{{ cfg.CURRENCY }}{{ '{:,.2f}'.format(order.discount) }}</span></div>{% endif %}
+            <div class="sum-row"><span>Shipping</span><span>{{ 'Free' if order.shipping == 0 else cfg.CURRENCY ~ '{:,.2f}'.format(order.shipping) }}</span></div>
+            <div class="sum-row total"><span>Total</span><span>{{ cfg.CURRENCY }}{{ '{:,.2f}'.format(order.total) }}</span></div></div></div>
+    <div class="panel"><h2>Delivery &amp; payment</h2>
+        <p><b>{{ order.customer_name }}</b><br>{{ order.address }}, {{ order.city }}<br>{{ order.phone }}{% if order.email %} · {{ order.email }}{% endif %}</p>
+        <p style="margin-top:10px">Payment: <b>{{ payment_methods.get(order.payment_method, order.payment_method) }}</b></p></div>
+    <p style="text-align:center;margin-top:22px"><a class="btn btn-ghost" href="/">Continue shopping</a></p>
+</div></main>
+{% endblock %}

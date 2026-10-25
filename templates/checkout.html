@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Checkout — {{ cfg.STORE_NAME }}{% endblock %}
+{% block content %}
+<main class="container page">
+    <h1>Checkout</h1>
+    <div id="emptyMsg" class="panel" hidden><h2>Your cart is empty</h2><p style="margin-bottom:16px;color:var(--muted)">Add a few products and come back.</p><a class="btn" href="/">Continue shopping</a></div>
+    <div class="co" id="coWrap" hidden>
+        <form class="panel" id="coForm" novalidate>
+            <h2>Delivery details</h2>
+            <div id="formError" class="alert alert-bad" hidden></div>
+            <div class="row2">
+                <div class="field"><label for="name">Full name *</label><input id="name" name="name" autocomplete="name" required maxlength="100"></div>
+                <div class="field"><label for="phone">Phone *</label><input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="+201001234567" required></div>
+            </div>
+            <div class="field"><label for="email">Email (for order updates)</label><input id="email" name="email" type="email" autocomplete="email"></div>
+            <div class="row2">
+                <div class="field"><label for="city">City *</label><input id="city" name="city" autocomplete="address-level2" required></div>
+                <div class="field"><label for="address">Street address *</label><input id="address" name="address" autocomplete="street-address" required></div>
+            </div>
+            <div class="field"><label for="notes">Delivery notes</label><textarea id="notes" name="notes" rows="2" maxlength="500"></textarea></div>
+            <h2 style="margin-top:8px">Payment</h2>
+            {% for key, label in payment_methods.items() %}
+            <label class="pay"><input type="radio" name="payment_method" value="{{ key }}" {{ 'checked' if loop.first }}>
+                <span><b>{{ label }}</b><small>{{ 'Pay when your order arrives.' if key == 'cod' else 'We will send bank details after you place the order.' }}</small></span></label>
+            {% endfor %}
+            <button class="btn btn-block" id="placeBtn" type="submit" style="margin-top:12px"><i class="fas fa-lock"></i> Place order</button>
+            <p style="font-size:12.5px;color:var(--muted);margin-top:10px">By placing your order you agree to our <a href="/policies/terms" style="text-decoration:underline">Terms</a> and <a href="/policies/privacy" style="text-decoration:underline">Privacy Policy</a>.</p>
+        </form>
+        <aside class="panel" style="position:sticky;top:96px"><h2>Order summary</h2><div id="sumLines"></div>
+            <form class="promo" id="promoForm"><input id="promo" placeholder="Promo code" aria-label="Promo code" maxlength="40"><button class="btn btn-dark" type="submit" style="padding:10px 16px">Apply</button></form>
+            <div id="sumTotals"></div></aside>
+    </div>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/checkout.js') }}?v=6"></script>{% endblock %}
